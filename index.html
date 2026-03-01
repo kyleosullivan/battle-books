@@ -988,7 +988,7 @@
   ═══════════════════════════════════════════════════════ */
   const sectionObserver = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.12 });
+  }, { threshold: 0, rootMargin: '0px 0px -60px 0px' });
   document.querySelectorAll('section').forEach(s => sectionObserver.observe(s));
 
   /* ═══════════════════════════════════════════════════════
@@ -1269,7 +1269,19 @@
     }));
   }
 
-  prefetchBookData().then(() => renderBooks());
+  // Render grid immediately so the section is never empty
+  renderBooks();
+
+  // Then fetch covers + descriptions and update the cards in place
+  prefetchBookData().then(() => {
+    books.forEach((book, idx) => {
+      if (!book.coverUrl) return;
+      const wrap = document.querySelectorAll('.book-cover-wrap')[idx];
+      if (!wrap) return;
+      const initials = book.title.split(' ').slice(0, 2).map(w => w[0]).join('');
+      wrap.innerHTML = `<img src="${book.coverUrl}" alt="Cover of ${book.title}" onerror="this.parentElement.innerHTML='<div class=\\'book-cover-fallback\\'>${initials}</div>'">`;
+    });
+  });
   </script>
 </body>
 </html>
