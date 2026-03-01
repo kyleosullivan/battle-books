@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commander Joe's Reading Mission</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #05061a;
+      --blue: #4fc3f7;
+      --yellow: #ffd54f;
+      --orange: #ff8c42;
+      --purple: #ce93d8;
+      --pink: #f48fb1;
+      --green: #a5d6a7;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: #e0e0e0;
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Starfield ── */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Scroll Rocket ── */
+    #scroll-rocket {
+      position: fixed;
+      right: 18px;
+      top: 0;
+      z-index: 100;
+      font-size: 2rem;
+      transition: top 0.1s linear;
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px var(--orange));
+    }
+    @media (max-width: 480px) { #scroll-rocket { display: none; } }
+
+    /* ── Sections ── */
+    section {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    section.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── Hero ── */
+    #hero {
+      text-align: center;
+      gap: 1.5rem;
+    }
+    .hero-rocket {
+      font-size: 5rem;
+      animation: float 3s ease-in-out infinite;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    #hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 900;
+      color: var(--yellow);
+      text-shadow: 0 0 30px rgba(255,213,79,0.6);
+      line-height: 1.15;
+    }
+    #hero h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1rem, 3vw, 1.6rem);
+      font-weight: 400;
+      color: var(--blue);
+      letter-spacing: 0.08em;
+    }
+    .hero-teaser {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .teaser-chip {
+      background: rgba(79,195,247,0.1);
+      border: 1px solid rgba(79,195,247,0.35);
+      border-radius: 999px;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.95rem;
+      color: var(--blue);
+    }
+    .scroll-hint {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.85rem;
+      animation: bob 2s ease-in-out infinite;
+    }
+    .scroll-hint span { font-size: 1.4rem; }
+
+    /* ── Stats ── */
+    #stats {
+      gap: 3rem;
+    }
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-weight: 700;
+      color: var(--yellow);
+      text-align: center;
+      margin-bottom: 0.25rem;
+      text-shadow: 0 0 20px rgba(255,213,79,0.4);
+    }
+    .section-subtitle {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.95rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 900px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .stat-card:hover {
+      border-color: rgba(79,195,247,0.5);
+      transform: translateY(-4px);
+    }
+    .stat-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+    .stat-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.4rem, 3.5vw, 2rem);
+      font-weight: 700;
+      color: var(--blue);
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 0.3rem;
+      display: block;
+    }
+    .comparisons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .comparison-card {
+      background: rgba(255,213,79,0.06);
+      border: 1px solid rgba(255,213,79,0.2);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .comparison-card .emoji { font-size: 1.8rem; flex-shrink: 0; }
+    .comparison-card p { font-size: 0.95rem; line-height: 1.55; }
+    .comparison-card strong { color: var(--yellow); }
+
+    /* ── Genres ── */
+    #genres { gap: 2rem; }
+    .planet-system {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      align-items: center;
+      max-width: 900px;
+    }
+    .planet {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      animation: orbit-float 6s ease-in-out infinite;
+    }
+    .planet:nth-child(2) { animation-delay: -1.2s; }
+    .planet:nth-child(3) { animation-delay: -2.4s; }
+    .planet:nth-child(4) { animation-delay: -3.6s; }
+    .planet:nth-child(5) { animation-delay: -4.8s; }
+    .planet-orb {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      box-shadow: 0 0 30px 6px currentColor;
+      transition: transform 0.3s;
+    }
+    .planet:hover .planet-orb { transform: scale(1.12); }
+    .planet.active .planet-orb {
+      transform: scale(1.18);
+      box-shadow: 0 0 50px 12px currentColor;
+    }
+    .planet-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+    }
+    .planet-count {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.45);
+    }
+    #genre-panel {
+      max-width: 700px;
+      width: 100%;
+      margin-top: 2rem;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.4s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    #genre-panel.open {
+      max-height: 500px;
+      opacity: 1;
+    }
+    .genre-panel-inner {
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      border-width: 1px;
+      border-style: solid;
+    }
+    .genre-panel-heading {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .genre-book-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .genre-book-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 0.6rem 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .genre-book-item:hover { background: rgba(255,255,255,0.09); }
+    .genre-book-cover {
+      width: 36px;
+      height: 54px;
+      border-radius: 4px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+    }
+    .genre-book-info { flex: 1; min-width: 0; }
+    .genre-book-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .genre-book-author {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.45);
+      margin-top: 0.15rem;
+    }
+    .genre-book-pages {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(255,213,79,0.1);
+      border: 1px solid rgba(255,213,79,0.3);
+      color: var(--yellow);
+      flex-shrink: 0;
+    }
+    .genre-panel-hint {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+
+    /* ── Books ── */
+    #books { gap: 2.5rem; }
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .book-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+    .book-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 10px 40px rgba(79,195,247,0.2);
+    }
+    .book-cover-wrap {
+      width: 100%;
+      aspect-ratio: 2/3;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      position: relative;
+    }
+    .book-cover-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .book-cover-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.6);
+      background: linear-gradient(135deg, rgba(79,195,247,0.15), rgba(206,147,216,0.15));
+    }
+    .book-info {
+      padding: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .book-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      line-height: 1.4;
+    }
+    .book-author {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+    }
+    .book-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+      padding-top: 0.5rem;
+    }
+    .book-tag {
+      font-size: 0.68rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(79,195,247,0.12);
+      border: 1px solid rgba(79,195,247,0.3);
+      color: var(--blue);
+    }
+    .book-pages-tag {
+      font-size: 0.68rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(255,213,79,0.1);
+      border: 1px solid rgba(255,213,79,0.3);
+      color: var(--yellow);
+    }
+
+    /* ── Mission Complete ── */
+    #mission-complete {
+      text-align: center;
+      gap: 1.5rem;
+      overflow: hidden;
+    }
+    .mission-emblem {
+      font-size: 5rem;
+      animation: float 2.5s ease-in-out infinite;
+      display: block;
+    }
+    #mission-complete h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      color: var(--yellow);
+      text-shadow: 0 0 40px rgba(255,213,79,0.7);
+    }
+    #mission-complete p {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: rgba(255,255,255,0.75);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+    .confetti-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confetti-fall linear infinite;
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+    .badge {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.75);
+    }
+    .badge strong { color: var(--yellow); }
+
+    /* ── Modal ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(5,6,26,0.88);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    #modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    #modal {
+      background: #0c0e2b;
+      border: 1px solid rgba(79,195,247,0.3);
+      border-radius: 20px;
+      max-width: 580px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      position: relative;
+      transform: scale(0.9);
+      transition: transform 0.25s;
+    }
+    #modal-overlay.open #modal { transform: scale(1); }
+    #modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      color: #e0e0e0;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    #modal-close:hover { background: rgba(255,255,255,0.18); }
+    .modal-inner {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    @media (max-width: 480px) {
+      .modal-inner { flex-direction: column; align-items: center; }
+    }
+    .modal-cover {
+      width: 120px;
+      min-width: 120px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .modal-cover img {
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+    }
+    .modal-cover-fallback {
+      width: 120px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.6);
+      background: linear-gradient(135deg, rgba(79,195,247,0.15), rgba(206,147,216,0.15));
+      border-radius: 8px;
+    }
+    .modal-details { flex: 1; }
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--yellow);
+      margin-bottom: 0.25rem;
+    }
+    .modal-author {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 0.75rem;
+    }
+    .modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .modal-desc {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: rgba(255,255,255,0.75);
+      margin-top: 0.5rem;
+    }
+    .modal-spinner {
+      display: inline-block;
+      width: 1.2rem;
+      height: 1.2rem;
+      border: 2px solid rgba(79,195,247,0.3);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.4rem;
+    }
+
+    /* ── Keyframes ── */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-18px); }
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+    @keyframes orbit-float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-14px) rotate(2deg); }
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0.3; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Starfield -->
+  <canvas id="starfield"></canvas>
+
+  <!-- Scroll Rocket -->
+  <div id="scroll-rocket">🚀</div>
+
+  <!-- ══════════════════════════════ HERO ══════════════════════════════ -->
+  <section id="hero">
+    <span class="hero-rocket">🚀</span>
+    <h1>Commander Joe's<br>Reading Mission</h1>
+    <h2>Battle of the Books — Mission Log</h2>
+    <div class="hero-teaser">
+      <span class="teaser-chip">📚 18 Books Conquered</span>
+      <span class="teaser-chip">📄 3,203 Pages</span>
+      <span class="teaser-chip">📺 457 YouTube Videos</span>
+    </div>
+    <div class="scroll-hint">
+      <span>↓</span>
+      <span>Scroll to explore</span>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ STATS ══════════════════════════════ -->
+  <section id="stats">
+    <h2 class="section-title">Mission Statistics</h2>
+    <p class="section-subtitle">The numbers behind Joe's reading odyssey</p>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">📚</span>
+        <span class="stat-number" data-target="18" data-suffix="">0</span>
+        <span class="stat-label">Books Completed</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📄</span>
+        <span class="stat-number" data-target="3203" data-suffix="">0</span>
+        <span class="stat-label">Pages Read</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🔤</span>
+        <span class="stat-number" data-target="640600" data-suffix="">0</span>
+        <span class="stat-label">Estimated Words</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">⏱️</span>
+        <span class="stat-number" data-target="80" data-suffix=" hrs">0</span>
+        <span class="stat-label">Reading Time</span>
+      </div>
+    </div>
+    <div class="comparisons">
+      <div class="comparison-card">
+        <span class="emoji">📺</span>
+        <p>At 200 words/page, Joe read <strong>640,600 words</strong> — the same as watching <strong>457 YouTube videos</strong> back-to-back!</p>
+      </div>
+      <div class="comparison-card">
+        <span class="emoji">🛸</span>
+        <p>~80 hours of reading = <strong>~52 full orbits of the ISS</strong> around Earth (92 min/orbit). That's a whole space mission!</p>
+      </div>
+      <div class="comparison-card">
+        <span class="emoji">🎬</span>
+        <p>80 hours of reading = time to watch <strong>40 full-length movies</strong>. Joe chose books every single time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ GENRES ══════════════════════════════ -->
+  <section id="genres">
+    <h2 class="section-title">Genre Galaxy</h2>
+    <p class="section-subtitle">Each planet is a genre Joe explored — size shows book count</p>
+    <div class="planet-system" id="planet-system"></div>
+    <div id="genre-panel" role="region" aria-live="polite"></div>
+  </section>
+
+  <!-- ══════════════════════════════ BOOKS ══════════════════════════════ -->
+  <section id="books">
+    <h2 class="section-title">The Reading Log</h2>
+    <p class="section-subtitle">Click any book for details and mission notes</p>
+    <div class="books-grid" id="books-grid"></div>
+  </section>
+
+  <!-- ══════════════════════════════ MISSION COMPLETE ══════════════════════════════ -->
+  <section id="mission-complete">
+    <div class="confetti-container" id="confetti-container"></div>
+    <span class="mission-emblem">🏆</span>
+    <h2>Mission Complete!</h2>
+    <p>Commander Joe has successfully navigated 18 books, charted unknown worlds, and returned with 3,203 pages of knowledge. The galaxy trembles at his dedication.</p>
+    <div class="badge-row">
+      <div class="badge">🚀 <strong>Page Turner</strong> — 3,203 pages</div>
+      <div class="badge">🌌 <strong>Genre Explorer</strong> — 5 genres</div>
+      <div class="badge">📺 <strong>Screen Skipper</strong> — 457 videos</div>
+      <div class="badge">🛸 <strong>ISS Veteran</strong> — 52 orbits</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ MODAL ══════════════════════════════ -->
+  <div id="modal-overlay">
+    <div id="modal">
+      <button id="modal-close" aria-label="Close">✕</button>
+      <div class="modal-inner">
+        <div class="modal-cover" id="modal-cover"></div>
+        <div class="modal-details">
+          <div class="modal-title" id="modal-title"></div>
+          <div class="modal-author" id="modal-author"></div>
+          <div class="modal-tags" id="modal-tags"></div>
+          <div class="modal-desc" id="modal-desc"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  'use strict';
+
+  /* ═══════════════════════════════════════════════════════
+     DATA
+  ═══════════════════════════════════════════════════════ */
+  const books = [
+    {
+      title: 'InvestiGators',
+      author: 'John Patrick Green',
+      genre: 'Adventure / Humor',
+      pages: 208,
+      series: true,
+      isbn: '9781250219954',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Space Chasers',
+      author: 'Joe Caramagna and Leland Melvin',
+      genre: 'Science / Adventure',
+      pages: 240,
+      series: false,
+      isbn: '9781250782779',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Tiny Jenny',
+      author: 'Briony May Smith',
+      genre: 'Fantasy',
+      pages: 48,
+      series: true,
+      isbn: '9780593650479',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Strega Nona Meets Her Match',
+      author: 'Tomie dePaola',
+      genre: 'Fantasy / Folklore',
+      pages: 32,
+      series: true,
+      isbn: '9780399224218',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'John Henry',
+      author: 'Julius Lester',
+      genre: 'Folklore',
+      pages: 40,
+      series: false,
+      isbn: '9780803716063',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Like Pickle Juice on a Cookie',
+      author: 'Julie Sternberg',
+      genre: 'Friendship / Realistic',
+      pages: 128,
+      series: true,
+      isbn: '9780810984240',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'The Last Firehawk: The Ember Stone',
+      author: 'Katrina Charman',
+      genre: 'Fantasy / Adventure',
+      pages: 96,
+      series: true,
+      isbn: '9781338122138',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Sadiq and the Gamers',
+      author: 'Siman Nuurali',
+      genre: 'Friendship / Realistic',
+      pages: 64,
+      series: true,
+      isbn: '9781663921918',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'The Mythics: Marina and the Kraken',
+      author: 'Lauren Magaziner',
+      genre: 'Fantasy / Adventure',
+      pages: 144,
+      series: true,
+      isbn: '9780063058880',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Zoey and Sassafras: Dragons and Marshmallows',
+      author: 'Asia Citro',
+      genre: 'Science / Fantasy',
+      pages: 96,
+      series: true,
+      isbn: '9781943147090',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'The Kids in Mrs. Z\'s Class: Emma McKenna Full Out',
+      author: 'Kate Messner',
+      genre: 'Friendship / Sports',
+      pages: 128,
+      series: true,
+      isbn: '9781523525713',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Growing Home',
+      author: 'Beth Ferry',
+      genre: 'Fantasy',
+      pages: 272,
+      series: false,
+      isbn: '9781665942485',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'The Lost Library',
+      author: 'Rebecca Stead and Wendy Mass',
+      genre: 'Adventure / Mystery',
+      pages: 224,
+      series: false,
+      isbn: '9781250838810',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'The Area 51 Files',
+      author: 'Julie Buxbaum',
+      genre: 'Sci-Fi / Adventure',
+      pages: 320,
+      series: false,
+      isbn: '9780593429495',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Explorer Academy: The Nebula Secret',
+      author: 'Trudi Trueit',
+      genre: 'Adventure / STEM',
+      pages: 216,
+      series: true,
+      isbn: '9781426338106',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'The Academy',
+      author: 'TZ Layton',
+      genre: 'Fantasy / Adventure',
+      pages: 306,
+      series: true,
+      isbn: '9781955804080',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Amari and the Night Brothers',
+      author: 'B.B. Alston',
+      genre: 'Fantasy / Supernatural',
+      pages: 416,
+      series: true,
+      isbn: '9780062975164',
+      coverUrl: null,
+      descCache: null,
+    },
+    {
+      title: 'Tuesdays at the Castle',
+      author: 'Jessica Day George',
+      genre: 'Fantasy / Adventure',
+      pages: 225,
+      series: true,
+      isbn: '9781599906447',
+      coverUrl: null,
+      descCache: null,
+    },
+  ];
+
+  const genres = [
+    { name: 'Fantasy',    count: 8, color: '#ce93d8', emoji: '🪄', keywords: ['fantasy', 'supernatural'] },
+    { name: 'Adventure',  count: 3, color: '#ff8c42', emoji: '🗺️', keywords: ['adventure', 'humor', 'mystery'] },
+    { name: 'Science',    count: 3, color: '#4fc3f7', emoji: '🔬', keywords: ['science', 'stem', 'sci-fi'] },
+    { name: 'Friendship', count: 3, color: '#f48fb1', emoji: '🤝', keywords: ['friendship', 'sports'] },
+    { name: 'Folklore',   count: 1, color: '#ffd54f', emoji: '📜', keywords: ['folklore'] },
+  ];
+
+  /* ═══════════════════════════════════════════════════════
+     STARFIELD
+  ═══════════════════════════════════════════════════════ */
+  (function initStarfield() {
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    const STAR_COUNT = 200;
+    let stars = [];
+    let W, H;
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.5 + 0.3,
+          base: Math.random() * 0.5 + 0.2,
+          opacity: Math.random(),
+          delta: (Math.random() * 0.008 + 0.002) * (Math.random() < 0.5 ? 1 : -1),
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      stars.forEach(s => {
+        s.opacity += s.delta;
+        if (s.opacity > s.base + 0.4 || s.opacity < s.base - 0.2) s.delta *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${Math.max(0, Math.min(1, s.opacity))})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+
+    resize();
+    createStars();
+    draw();
+    window.addEventListener('resize', () => { resize(); createStars(); });
+  })();
+
+  /* ═══════════════════════════════════════════════════════
+     SCROLL ROCKET
+  ═══════════════════════════════════════════════════════ */
+  const rocket = document.getElementById('scroll-rocket');
+  window.addEventListener('scroll', () => {
+    const scrollable = document.body.scrollHeight - window.innerHeight;
+    if (scrollable <= 0) return;
+    const progress = window.scrollY / scrollable;
+    rocket.style.top = `${progress * (window.innerHeight - 80)}px`;
+  }, { passive: true });
+
+  /* ═══════════════════════════════════════════════════════
+     SECTION REVEAL — IntersectionObserver
+  ═══════════════════════════════════════════════════════ */
+  const sectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('section').forEach(s => sectionObserver.observe(s));
+
+  /* ═══════════════════════════════════════════════════════
+     ANIMATED COUNTERS
+  ═══════════════════════════════════════════════════════ */
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target, 10);
+    const suffix = el.dataset.suffix || '';
+    const duration = 1500;
+    const start = performance.now();
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function step(now) {
+      const elapsed = Math.min(now - start, duration);
+      const value = Math.round(easeOut(elapsed / duration) * target);
+      el.textContent = value.toLocaleString() + suffix;
+      if (elapsed < duration) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  let countersTriggered = false;
+  const statsObserver = new IntersectionObserver(entries => {
+    if (countersTriggered) return;
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        countersTriggered = true;
+        document.querySelectorAll('#stats .stat-number').forEach(animateCounter);
+      }
+    });
+  }, { threshold: 0.2 });
+  statsObserver.observe(document.getElementById('stats'));
+
+  /* ═══════════════════════════════════════════════════════
+     GENRE PLANETS
+  ═══════════════════════════════════════════════════════ */
+  function booksForGenre(genre) {
+    return books.filter(b =>
+      genre.keywords.some(kw => b.genre.toLowerCase().includes(kw))
+    );
+  }
+
+  let activePlanetEl = null;
+  let activeGenreIdx = null;
+  const genrePanel = document.getElementById('genre-panel');
+
+  function closeGenrePanel() {
+    genrePanel.classList.remove('open');
+    if (activePlanetEl) activePlanetEl.classList.remove('active');
+    activePlanetEl = null;
+    activeGenreIdx = null;
+  }
+
+  function openGenrePanel(genre, planetEl, bookList) {
+    const coverRow = bookList.map(b => {
+      const initials = b.title.split(' ').slice(0, 2).map(w => w[0]).join('');
+      const bookIdx = books.indexOf(b);
+      const coverImg = b.coverUrl
+        ? `<img class="genre-book-cover" src="${b.coverUrl}" alt="Cover of ${b.title}" onerror="this.style.display='none'">`
+        : `<div class="genre-book-cover" style="display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:0.9rem;font-weight:700;color:rgba(255,255,255,0.5);background:linear-gradient(135deg,rgba(79,195,247,0.15),rgba(206,147,216,0.15));border-radius:4px;">${initials}</div>`;
+      return `
+        <div class="genre-book-item" role="button" tabindex="0"
+             aria-label="Open details for ${b.title}"
+             onclick="openModal(${bookIdx})"
+             onkeydown="if(event.key==='Enter'||event.key===' ')openModal(${bookIdx})">
+          ${coverImg}
+          <div class="genre-book-info">
+            <div class="genre-book-title">${b.title}</div>
+            <div class="genre-book-author">${b.author}</div>
+          </div>
+          <span class="genre-book-pages">${b.pages} pp</span>
+        </div>
+      `;
+    }).join('');
+
+    genrePanel.innerHTML = `
+      <div class="genre-panel-inner"
+           style="background:${genre.color}0f;border-color:${genre.color}44;">
+        <div class="genre-panel-heading" style="color:${genre.color};">
+          ${genre.emoji} ${genre.name} — ${bookList.length} book${bookList.length !== 1 ? 's' : ''}
+        </div>
+        <div class="genre-book-list">${coverRow}</div>
+        <p class="genre-panel-hint">Click a book to open its details</p>
+      </div>
+    `;
+    genrePanel.classList.add('open');
+  }
+
+  (function renderGenres() {
+    const container = document.getElementById('planet-system');
+    const maxCount = Math.max(...genres.map(g => g.count));
+    genres.forEach((g, i) => {
+      const size = 80 + (g.count / maxCount) * 80; // 80–160px
+      const planet = document.createElement('div');
+      planet.className = 'planet';
+      planet.setAttribute('role', 'button');
+      planet.setAttribute('tabindex', '0');
+      planet.setAttribute('aria-label', `Show ${g.name} books`);
+      planet.style.animationDelay = `${-i * 1.2}s`;
+      planet.innerHTML = `
+        <div class="planet-orb" style="width:${size}px;height:${size}px;background:${g.color}22;border:3px solid ${g.color};color:${g.color};">
+          ${g.emoji}
+        </div>
+        <span class="planet-name">${g.name}</span>
+        <span class="planet-count">${g.count} book${g.count !== 1 ? 's' : ''}</span>
+      `;
+
+      function handleSelect() {
+        // Toggle off if same planet clicked again
+        if (activeGenreIdx === i) {
+          closeGenrePanel();
+          return;
+        }
+        if (activePlanetEl) activePlanetEl.classList.remove('active');
+        planet.classList.add('active');
+        activePlanetEl = planet;
+        activeGenreIdx = i;
+        openGenrePanel(g, planet, booksForGenre(g));
+        // Scroll panel into view smoothly
+        setTimeout(() => genrePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+      }
+
+      planet.addEventListener('click', handleSelect);
+      planet.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handleSelect(); });
+      container.appendChild(planet);
+    });
+  })();
+
+  /* ═══════════════════════════════════════════════════════
+     BOOK GRID
+  ═══════════════════════════════════════════════════════ */
+  function renderBooks() {
+    const grid = document.getElementById('books-grid');
+    books.forEach((book, idx) => {
+      const card = document.createElement('div');
+      card.className = 'book-card';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', `Open details for ${book.title}`);
+
+      const initials = book.title.split(' ').slice(0, 2).map(w => w[0]).join('');
+      const coverInner = book.coverUrl
+        ? `<img src="${book.coverUrl}" alt="Cover of ${book.title}" onerror="this.parentElement.innerHTML='<div class=\\'book-cover-fallback\\'>${initials}</div>'">`
+        : `<div class="book-cover-fallback">${initials}</div>`;
+
+      card.innerHTML = `
+        <div class="book-cover-wrap">${coverInner}</div>
+        <div class="book-info">
+          <div class="book-title">${book.title}</div>
+          <div class="book-author">${book.author}</div>
+          <div class="book-meta">
+            <span class="book-pages-tag">${book.pages} pp</span>
+            <span class="book-tag">${book.genre.split(' / ')[0]}</span>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => openModal(idx));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openModal(idx); });
+      grid.appendChild(card);
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     MODAL
+  ═══════════════════════════════════════════════════════ */
+  const overlay = document.getElementById('modal-overlay');
+  const modalClose = document.getElementById('modal-close');
+  const modalCover = document.getElementById('modal-cover');
+  const modalTitle = document.getElementById('modal-title');
+  const modalAuthor = document.getElementById('modal-author');
+  const modalTags = document.getElementById('modal-tags');
+  const modalDesc = document.getElementById('modal-desc');
+
+  async function openModal(idx) {
+    const book = books[idx];
+
+    // Cover
+    const initials = book.title.split(' ').slice(0, 2).map(w => w[0]).join('');
+    modalCover.innerHTML = book.coverUrl
+      ? `<img src="${book.coverUrl}" alt="Cover of ${book.title}" onerror="this.outerHTML='<div class=\\'modal-cover-fallback\\'>${initials}</div>'">`
+      : `<div class="modal-cover-fallback">${initials}</div>`;
+
+    // Text
+    modalTitle.textContent = book.title;
+    modalAuthor.textContent = `by ${book.author}`;
+    modalTags.innerHTML = `
+      <span class="book-tag">${book.genre}</span>
+      <span class="book-pages-tag">${book.pages} pages</span>
+      ${book.series ? '<span class="book-tag">Series</span>' : ''}
+    `;
+
+    modalDesc.textContent = book.descCache || "No description available — but it's a great read!";
+
+    // Open overlay
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    modalClose.focus();
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  /* ═══════════════════════════════════════════════════════
+     CONFETTI
+  ═══════════════════════════════════════════════════════ */
+  (function initConfetti() {
+    const container = document.getElementById('confetti-container');
+    const colors = ['#ffd54f','#4fc3f7','#ff8c42','#ce93d8','#f48fb1','#a5d6a7','#ef5350'];
+    const PIECES = 50;
+
+    for (let i = 0; i < PIECES; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size = Math.random() * 8 + 5;
+      const left = Math.random() * 100;
+      const delay = Math.random() * 4;
+      const duration = Math.random() * 3 + 3;
+      const isCircle = Math.random() > 0.5;
+      el.style.cssText = `
+        left: ${left}%;
+        width: ${size}px;
+        height: ${size}px;
+        background: ${color};
+        border-radius: ${isCircle ? '50%' : '2px'};
+        animation-duration: ${duration}s;
+        animation-delay: ${delay}s;
+      `;
+      container.appendChild(el);
+    }
+
+    // Only animate confetti when section is visible
+    const missionSection = document.getElementById('mission-complete');
+    const confettiObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        container.style.display = e.isIntersecting ? 'block' : 'none';
+      });
+    }, { threshold: 0.1 });
+    confettiObserver.observe(missionSection);
+  })();
+
+  /* ═══════════════════════════════════════════════════════
+     GOOGLE BOOKS PREFETCH + INIT
+  ═══════════════════════════════════════════════════════ */
+  async function prefetchBookData() {
+    await Promise.all(books.map(async book => {
+      try {
+        const res = await fetch(
+          `https://www.googleapis.com/books/v1/volumes?q=isbn:${book.isbn}`
+        );
+        const data = await res.json();
+        const volumeId = data.items?.[0]?.id;
+        const info = data.items?.[0]?.volumeInfo;
+        if (!info) return;
+
+        // Build cover URL directly from the volume ID — reliable HTTPS, no string-mangling
+        if (volumeId) {
+          book.coverUrl = `https://books.google.com/books/content?id=${volumeId}&printsec=frontcover&img=1&zoom=1`;
+        }
+
+        // Description
+        if (info.description) {
+          book.descCache = info.description;
+        } else {
+          book.descCache = "No description available — but it's a great read!";
+        }
+      } catch {
+        book.descCache = "No description available — but it's a great read!";
+      }
+    }));
+  }
+
+  prefetchBookData().then(() => renderBooks());
+  </script>
+</body>
+</html>
